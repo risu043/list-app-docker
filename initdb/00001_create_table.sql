@@ -1,0 +1,8 @@
+CREATE DATABASE IF NOT EXISTS list_app_db;
+USE list_app_db;
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    content VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
