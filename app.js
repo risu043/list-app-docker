@@ -100,7 +100,7 @@ const startServer = async () => {
 
   const server = app.listen(port, () => {
     console.log(
-      `Server is running. See http://localhost:${port}/messages to get messages.`
+      `Server is running. See http://localhost:${port} to get messages.`
     );
   });
 
