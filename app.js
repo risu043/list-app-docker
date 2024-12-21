@@ -6,6 +6,7 @@ const DB_HOST = process.env.DB_HOST || 'db';
 const DB_USER = process.env.DB_USER || 'root';
 const DB_PASSWORD = process.env.DB_PASSWORD || 'some-random-password-yay';
 const DB_NAME = process.env.DB_NAME || 'list_app_db';
+const DB_SOCKET_PATH = process.env.DB_SOCKET_PATH;
 
 const startServer = async () => {
   const app = express();
@@ -21,6 +22,9 @@ const startServer = async () => {
     user: DB_USER,
     password: DB_PASSWORD,
     database: DB_NAME,
+    // When `socketPath` is defined, `host` is ignored.
+    socketPath: DB_SOCKET_PATH,
+    // Timezone on MySQL must be set to UTC.
     timezone: 'Z',
   });
 
@@ -30,11 +34,11 @@ const startServer = async () => {
 
   app.get('/index', async (req, res) => {
     try {
-      const [results] = await connection.query('SELECT * FROM users');
+      const [results] = await connection.query('SELECT * FROM messages');
       res.render('index.ejs', { items: results });
     } catch (error) {
       console.error('Error fetching users:', error);
-      res.status(500).send('An error occurred while fetching users');
+      res.status(500).send('An error occurred while fetching messages');
     }
   });
 
@@ -46,24 +50,26 @@ const startServer = async () => {
   // 追加画面のメモを追加する
   app.post('/create', async (req, res) => {
     try {
-      await connection.query('INSERT INTO users (content) VALUES (?)', [
+      await connection.query('INSERT INTO messages (content) VALUES (?)', [
         req.body.itemName,
       ]);
       res.redirect('/index');
     } catch (error) {
       console.error('Error creating user:', error);
-      res.status(500).send('An error occurred while creating a user');
+      res.status(500).send('An error occurred while creating a messages');
     }
   });
 
   // メモを削除する
   app.post('/delete/:id', async (req, res) => {
     try {
-      await connection.query('DELETE FROM users WHERE id = ?', [req.params.id]);
+      await connection.query('DELETE FROM messages WHERE id = ?', [
+        req.params.id,
+      ]);
       res.redirect('/index');
     } catch (error) {
-      console.error('Error deleting user:', error);
-      res.status(500).send('An error occurred while deleting a user');
+      console.error('Error deleting messages:', error);
+      res.status(500).send('An error occurred while deleting a messages');
     }
   });
 
@@ -71,20 +77,22 @@ const startServer = async () => {
   app.get('/edit/:id', async (req, res) => {
     try {
       const [results] = await connection.query(
-        'SELECT * FROM users WHERE id = ?',
+        'SELECT * FROM messages WHERE id = ?',
         [req.params.id]
       );
       res.render('edit.ejs', { item: results[0] });
     } catch (error) {
-      console.error('Error fetching user for edit:', error);
-      res.status(500).send('An error occurred while fetching user for edit');
+      console.error('Error fetching messages for edit:', error);
+      res
+        .status(500)
+        .send('An error occurred while fetching messages for edit');
     }
   });
 
   // 編集画面のメモを更新する
   app.post('/update/:id', async (req, res) => {
     try {
-      await connection.query('UPDATE users SET content=? WHERE id=?', [
+      await connection.query('UPDATE messages SET content=? WHERE id=?', [
         req.body.itemName,
         req.params.id,
       ]);

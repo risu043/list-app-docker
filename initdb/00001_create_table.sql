@@ -1,7 +1,7 @@
 CREATE DATABASE IF NOT EXISTS list_app_db;
 USE list_app_db;
 
-CREATE TABLE users (
+CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
     content VARCHAR(255) NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
